@@ -3,16 +3,22 @@
 
 import random
 import time
+
 import Adafruit_DHT
 import board
 import busio
 import adafruit_adxl34x
 
+# Using the Python Device SDK for IoT Hub:
+# https://github.com/Azure/azure-iot-sdk-python
+# The sample connects to a device-specific MQTT endpoint on your IoT Hub.
+from azure.iot.device import IoTHubDeviceClient, Message
+
 # Set sensor type : Options are DHT11,DHT22 or AM2302
-sensor=Adafruit_DHT.DHT11
+sensor_DHT11=Adafruit_DHT.DHT11
 
 # Set GPIO sensor is connected to
-gpio=17
+gpioPin_DHT11 = 17
 
 # Here we utilize the “busio” library to prepare an I2C connection for our current boards SCL and SDA pins
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -21,11 +27,6 @@ i2c = busio.I2C(board.SCL, board.SDA)
 # We will utilize this object to read and obtain information from our sensor.
 # Into the constructor for the library, we pass in our I2C handle
 accelerometer = adafruit_adxl34x.ADXL345(i2c)
-
-# Using the Python Device SDK for IoT Hub:
-# https://github.com/Azure/azure-iot-sdk-python
-# The sample connects to a device-specific MQTT endpoint on your IoT Hub.
-from azure.iot.device import IoTHubDeviceClient, Message
 
 # The device connection string to authenticate the device with your IoT hub.
 # Using the Azure CLI:
@@ -57,7 +58,7 @@ def iothub_client_telemetry_sample_run():
         while True:
             # Use read_retry method. This will retry up to 15 times to
             # get a sensor reading (waiting 2 seconds between each retry).
-            humidity, temprature = Adafruit_DHT.read_retry(sensor, gpio)
+            humidity, temprature = Adafruit_DHT.read_retry(sensor_DHT11, gpioPin_DHT11)
             
             #X, Y, and Z acceleration values that have been retrieved from the accelerometer by the library.
             x_axis, y_axis, z_axis = accelerometer.acceleration()
