@@ -18,7 +18,7 @@ from azure.iot.device import IoTHubDeviceClient, Message
 sensor_DHT11=Adafruit_DHT.DHT11
 
 # Set GPIO sensor is connected to
-gpioPin_DHT11 = 17
+gpioPin_DHT11 = 23
 
 # Here we utilize the “busio” library to prepare an I2C connection for our current boards SCL and SDA pins
 i2c = busio.I2C(board.SCL, board.SDA)
@@ -31,18 +31,10 @@ accelerometer = adafruit_adxl34x.ADXL345(i2c)
 # The device connection string to authenticate the device with your IoT hub.
 # Using the Azure CLI:
 # az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyNodeDevice --output table
-CONNECTION_STRING = "{Your IoT hub device connection string}"
+CONNECTION_STRING = "HostName=MSR0806.azure-devices.net;DeviceId=MyRPi;SharedAccessKey=Ju/XDp5Ff7KNx4JihMtJd6weTQ5tZWcIlsjm8CFGZVQ="
 
 # Define the JSON message to send to IoT Hub.
-MSG_TXT = '{
-    {
-        "temperature": {temperature},
-        "humidity": {humidity},
-        "x_axis": {x_axis},
-        "y_axis": {y_axis},
-        "z_axis": {z_axis}
-    }
-}'
+MSG_TXT = '{{"temperature": {temperature},"humidity": {humidity},"x_axis": {x_axis},"y_axis": {y_axis},"z_axis": {z_axis}}}'
 
 def iothub_client_init():
     # Create an IoT Hub client
@@ -58,12 +50,12 @@ def iothub_client_telemetry_sample_run():
         while True:
             # Use read_retry method. This will retry up to 15 times to
             # get a sensor reading (waiting 2 seconds between each retry).
-            humidity, temprature = Adafruit_DHT.read_retry(sensor_DHT11, gpioPin_DHT11)
+            humidity, temperature = Adafruit_DHT.read_retry(sensor_DHT11, gpioPin_DHT11)
             
             #X, Y, and Z acceleration values that have been retrieved from the accelerometer by the library.
-            x_axis, y_axis, z_axis = accelerometer.acceleration()
+            x_axis, y_axis, z_axis = accelerometer.acceleration
             
-            if humidity and temprature and x_axis and y_axis and z_axis:
+            if humidity and temperature and x_axis and y_axis and z_axis:
                 msg_txt_formatted = MSG_TXT.format(temperature = temperature, humidity = humidity, x_axis = x_axis, y_axis = y_axis, z_axis = z_axis)
                 message = Message(msg_txt_formatted)
             else:
@@ -80,7 +72,7 @@ def iothub_client_telemetry_sample_run():
             print( "Sending message: {}".format(message) )
             client.send_message(message)
             print ( "Message successfully sent" )
-            time.sleep(1)
+            time.sleep(10)
 
     except KeyboardInterrupt:
         print ( "IoTHubClient sample stopped" )
